@@ -25,12 +25,6 @@ dev_packages = [
     "pre-commit==2.11.1",
 ]
 
-docs_packages = [
-    "mkdocs==1.1.2",
-    "mkdocs-macros-plugin==0.5.0",
-    "mkdocs-material==6.2.4",
-    "mkdocstrings==0.14.0",
-]
 
 setup(
     name="Blog Diego ds",
@@ -58,10 +52,5 @@ setup(
         "test": test_packages,
         "dev": test_packages + dev_packages + docs_packages,
         "docs": docs_packages,
-    },
-    entry_points={
-        "console_scripts": [
-            "tagifai = app.cli:app",
-        ],
-    },
+    }
 )
