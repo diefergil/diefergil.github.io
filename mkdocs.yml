@@ -1,26 +1,89 @@
-site_name: My Docs
-nav:     
-  - Home: index.md
-  - "Apache Spark": 
-    - "Time series features creation": 'Apache Spark/time_series_FE.md'
+site_name: Diego Fernández Gil
+
+# Social media
+extra:
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://linkedin.com/in/diegofernandezgil
+    - icon: fontawesome/brands/github
+      link: https://github.com/diefergil
 
 theme:
-  name: null
+  name: material
   custom_dir: mkdocs-material/material
 
   # 404 page
   static_templates:
     - 404.html
-
-  # Necessary for search to work properly
-  include_search_page: true
-  search_index_only: true
-
-  # Default values, taken from mkdocs_theme.yml
-  language: en
+  #logo: static/images/logo.png
+  favicon: assets/favicon.png
+  palette:
+    primary: indigo
+    accent: indigo
   font:
     text: Roboto
     code: Roboto Mono
-  favicon: assets/favicon.png
+  features:
+    - navigation.tabs
+    - navigation.expand
   icon:
+    #repo: fontawesome/brands/github
     logo: logo
+
+# Extensions
+markdown_extensions:
+  - meta
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - admonition # alerts
+  - pymdownx.details #  collapsible alerts
+  - pymdownx.superfences # nest code and content inside alerts
+  - attr_list # add HTML and CSS to Markdown elements
+  - pymdownx.inlinehilite # inline code highlights
+  - pymdownx.keys # show keystroke symbols
+  - pymdownx.snippets # insert content from other files
+  - pymdownx.tabbed # content tabs
+  - footnotes
+  - def_list
+  - pymdownx.arithmatex: # mathjax
+      generic: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+      clickable_checkbox: true
+  - codehilite
+  - pymdownx.highlight:
+      use_pygments: true
+  - toc:
+      toc_depth: 4
+
+# Plugins
+plugins:
+  - search
+  - macros
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_root_heading: false
+            show_source: true
+            show_category_heading: true
+      watch:
+        - tagifai
+
+# Extra CSS
+extra_css:
+  - static/css/custom.css
+
+# Extra JS
+extra_javascript:
+  - https://cdnjs.cloudflare.com/ajax/libs/tablesort/5.2.1/tablesort.min.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# Page tree
+nav:     
+  - Home: index.md
+  - "Apache Spark": 
+    - "Time series features creation": 'Apache Spark/time_series_FE.md'

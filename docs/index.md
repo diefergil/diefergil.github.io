@@ -1,6 +1,16 @@
-# Welcome to MkDocs
+# Welcome to my blog
+
+> If you need refresh yourself on ML algorithms, check out our [ML Foundations](https://github.com/GokuMohandas/MadeWithML) repository (🔥&nbsp; Among the <a href="https://github.com/topics/deep-learning" target="_blank">top ML</a> repositories on GitHub)
 
 For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+
+
+| Method      | Description                          |
+| :---------: | :----------------------------------: |
+| `GET`       | :material-check:     Fetch resource  |
+| `PUT`       | :material-check-all: Update resource |
+| `DELETE`    | :material-close:     Delete resource |
+
 
 ## Commands
 
