@@ -1,0 +1,399 @@
+# Time series feature engineering
+
+How to take advantage of python to create temporary variable transformations using Python
+
+
+
+## Rolling windows with Pandas
+
+
+```python
+import pandas as pd
+```
+
+
+```python
+# Create a simple DataFrame.
+data = [
+('a', 1, 4.15, '2016-01-02 00:01:02'),
+('a', 3, 50., '2016-01-02 00:01:03'),
+('b', 2, 190., '2016-01-02 23:59:50'),
+('b', 1, 43., '2016-01-02 23:59:59'),
+('b', 3, 12., '2016-01-02 23:59:59'),
+('a', 5, 29.5, '2016-02-02 00:01:02'),
+('a', 7, 16.38, '2016-02-04 00:01:03'),
+('b', 10, 24.43, '2016-02-05 23:59:50'),
+('b', 2, 3.99, '2016-03-09 23:59:59'),
+('a', 3, 2.15, '2016-05-02 00:01:02'),
+('a', 1, 246.32, '2016-06-04 00:01:03'),
+('b', 9, 187.12, '2016-07-05 23:59:50'),
+('b', 4, 210., '2016-08-09 23:59:59')
+]
+
+data=pd.DataFrame(data, columns=["user_id", "items", "amount", "timestamp"] ).set_index("user_id").sort_values(["user_id","timestamp"], ascending=[True, True])
+data["timestamp"]=pd.to_datetime(data["timestamp"])
+```
+
+
+```python
+print(data)
+```
+
+             items  amount           timestamp
+    user_id                                   
+    a            1    4.15 2016-01-02 00:01:02
+    a            3   50.00 2016-01-02 00:01:03
+    a            5   29.50 2016-02-02 00:01:02
+    a            7   16.38 2016-02-04 00:01:03
+    a            3    2.15 2016-05-02 00:01:02
+    a            1  246.32 2016-06-04 00:01:03
+    b            2  190.00 2016-01-02 23:59:50
+    b            1   43.00 2016-01-02 23:59:59
+    b            3   12.00 2016-01-02 23:59:59
+    b           10   24.43 2016-02-05 23:59:50
+    b            2    3.99 2016-03-09 23:59:59
+    b            9  187.12 2016-07-05 23:59:50
+    b            4  210.00 2016-08-09 23:59:59
+
+
+
+```python
+key_columns =  ['user_id', 'timestamp']
+base_columns = ["items", "amount"]
+```
+
+Here’s an awesome gif that explains this idea in a wonderfully intuitive way:
+
+![Alt Text](https://cdn.analyticsvidhya.com/wp-content/uploads/2019/11/3hotmk.gif)
+
+
+
+Since this looks like a window that is sliding with every next point, the features generated using this method are called the ‘rolling window’ features.
+
+
+```python
+rolling_times = (2, 3, 4)
+print(data.assign(**{
+    '{}_rolling_sum_{}'.format(col, t): data[col].groupby(level="user_id").rolling(window = t).sum().values
+    for t in rolling_times
+    for col in base_columns}).sort_values(["user_id", "timestamp"]))
+```
+
+             items  amount           timestamp  items_rolling_sum_2  \
+    user_id                                                           
+    a            1    4.15 2016-01-02 00:01:02                  NaN   
+    a            3   50.00 2016-01-02 00:01:03                  4.0   
+    a            5   29.50 2016-02-02 00:01:02                  8.0   
+    a            7   16.38 2016-02-04 00:01:03                 12.0   
+    a            3    2.15 2016-05-02 00:01:02                 10.0   
+    a            1  246.32 2016-06-04 00:01:03                  4.0   
+    b            2  190.00 2016-01-02 23:59:50                  NaN   
+    b            1   43.00 2016-01-02 23:59:59                  3.0   
+    b            3   12.00 2016-01-02 23:59:59                  4.0   
+    b           10   24.43 2016-02-05 23:59:50                 13.0   
+    b            2    3.99 2016-03-09 23:59:59                 12.0   
+    b            9  187.12 2016-07-05 23:59:50                 11.0   
+    b            4  210.00 2016-08-09 23:59:59                 13.0   
+    
+             amount_rolling_sum_2  items_rolling_sum_3  amount_rolling_sum_3  \
+    user_id                                                                    
+    a                         NaN                  NaN                   NaN   
+    a                       54.15                  NaN                   NaN   
+    a                       79.50                  9.0                 83.65   
+    a                       45.88                 15.0                 95.88   
+    a                       18.53                 15.0                 48.03   
+    a                      248.47                 11.0                264.85   
+    b                         NaN                  NaN                   NaN   
+    b                      233.00                  NaN                   NaN   
+    b                       55.00                  6.0                245.00   
+    b                       36.43                 14.0                 79.43   
+    b                       28.42                 15.0                 40.42   
+    b                      191.11                 21.0                215.54   
+    b                      397.12                 15.0                401.11   
+    
+             items_rolling_sum_4  amount_rolling_sum_4  
+    user_id                                             
+    a                        NaN                   NaN  
+    a                        NaN                   NaN  
+    a                        NaN                   NaN  
+    a                       16.0                100.03  
+    a                       18.0                 98.03  
+    a                       16.0                294.35  
+    b                        NaN                   NaN  
+    b                        NaN                   NaN  
+    b                        NaN                   NaN  
+    b                       16.0                269.43  
+    b                       16.0                 83.42  
+    b                       24.0                227.54  
+    b                       25.0                425.54  
+
+
+## Lags Feature with pandas
+
+Consider this – you are predicting the stock price for a company. So, the previous day’s stock price is important to make a prediction, right? In other words, the value at time t is greatly affected by the value at time t-1. The past values are known as lags, so t-1 is lag 1, t-2 is lag 2, and so on.
+
+
+```python
+lags = (1, 2)
+
+print(data.assign(**{
+    '{}_lag_{}'.format(col, t): data[col].groupby(level="user_id").shift(t)
+    for t in lags
+    for col in base_columns}))
+```
+
+             items  amount           timestamp  items_lag_1  amount_lag_1  \
+    user_id                                                                 
+    a            1    4.15 2016-01-02 00:01:02          NaN           NaN   
+    a            3   50.00 2016-01-02 00:01:03          1.0          4.15   
+    a            5   29.50 2016-02-02 00:01:02          3.0         50.00   
+    a            7   16.38 2016-02-04 00:01:03          5.0         29.50   
+    a            3    2.15 2016-05-02 00:01:02          7.0         16.38   
+    a            1  246.32 2016-06-04 00:01:03          3.0          2.15   
+    b            2  190.00 2016-01-02 23:59:50          NaN           NaN   
+    b            1   43.00 2016-01-02 23:59:59          2.0        190.00   
+    b            3   12.00 2016-01-02 23:59:59          1.0         43.00   
+    b           10   24.43 2016-02-05 23:59:50          3.0         12.00   
+    b            2    3.99 2016-03-09 23:59:59         10.0         24.43   
+    b            9  187.12 2016-07-05 23:59:50          2.0          3.99   
+    b            4  210.00 2016-08-09 23:59:59          9.0        187.12   
+    
+             items_lag_2  amount_lag_2  
+    user_id                             
+    a                NaN           NaN  
+    a                NaN           NaN  
+    a                1.0          4.15  
+    a                3.0         50.00  
+    a                5.0         29.50  
+    a                7.0         16.38  
+    b                NaN           NaN  
+    b                NaN           NaN  
+    b                2.0        190.00  
+    b                1.0         43.00  
+    b                3.0         12.00  
+    b               10.0         24.43  
+    b                2.0          3.99  
+
+
+# Rolling Features with Apache Spark and Pyspark
+
+Init Pyspark
+
+
+```python
+from pyspark import SparkContext, SQLContext, SparkConf
+from pyspark.sql import functions as F
+from pyspark.sql import SparkSession, Window
+
+conf = SparkConf().setAll([
+                       ('spark.master', "local"),
+                       ("spark.sql.execution.arrow.enabled", "true")])
+
+sc = SparkSession.builder.config(conf=conf).getOrCreate()
+sc
+```
+
+
+
+
+
+    <div>
+        <p><b>SparkSession - hive</b></p>
+
+<div>
+    <p><b>SparkContext</b></p>
+
+    <p><a href="http://hub-dataproc-test-1-diego-fernandez-m.c.bnext-machine.internal:41743">Spark UI</a></p>
+
+    <dl>
+      <dt>Version</dt>
+        <dd><code>v2.4.7</code></dd>
+      <dt>Master</dt>
+        <dd><code>yarn</code></dd>
+      <dt>AppName</dt>
+        <dd><code>PySparkShell</code></dd>
+    </dl>
+</div>
+
+    </div>
+
+
+
+
+
+```python
+sdf = sc.createDataFrame(data.reset_index())
+```
+
+
+```python
+print(sdf)
+```
+
+    DataFrame[user_id: string, items: bigint, amount: double, timestamp: timestamp]
+
+
+We use a dictionary to specify the aggregations we want using already available functions.
+
+
+```python
+aggregations = {"max": F.max, "sum": F.sum}
+```
+
+In the next cell I declare how to calculate a sliding window. First I indicate that I want an aggregation for each user with a date-based sort. Then from my aggregation I indicate that I only want the current value and the immediately previous one.
+
+
+```python
+window_expanding = Window.partitionBy("user_id").orderBy(sdf["timestamp"].asc())
+window_expanding_unbounded_2 = window_expanding.rowsBetween(-1, 0)
+```
+
+Here I create a class that allows me to scale the creation of variables through a simple loop that joins variable names with the transformations that I specify in the dictionary.
+
+
+```python
+from collections import namedtuple
+
+class AggregationOp(namedtuple("Op", ["c", "func", "alias"])):
+    
+    def expr(self):
+        if callable(self.func):
+            return self.func(self.c).alias(self.alias)
+        else:
+            return F.expr("{func}(`{c}`)".format
+                (func = self.func, c = self.c)).alias(self.alias)
+        
+    def expr_window(self, window):
+        if callable(self.func):
+            return self.func(self.c).over(window).alias(self.alias)
+        else:
+            return F.expr("{func}(`{c}`)".format
+                (func = self.func, c = self.c)).over(window).alias(self.alias)
+```
+
+
+```python
+ops = [AggregationOp(col, agg, "{}_rolling_{}".format(col, agg)) for col in base_columns for agg in aggregations.keys()] #unbounded transformation
+ops_bounded_2 = [AggregationOp(col, agg, "{}_rolling_{}_2".format(col, agg)) for col in base_columns for agg in aggregations.keys()] #bounded transformation (-1, 0)=(1 preceding and current)
+
+```
+
+
+```python
+print(ops)
+```
+
+    [AggregationOp(c='items', func='max', alias='items_rolling_max'), AggregationOp(c='items', func='sum', alias='items_rolling_sum'), AggregationOp(c='amount', func='max', alias='amount_rolling_max'), AggregationOp(c='amount', func='sum', alias='amount_rolling_sum')]
+
+
+
+```python
+sdf = sdf.select( *[op.expr_window(window_expanding) for op in ops] + 
+                 ['user_id', "timestamp"] + base_columns )
+```
+
+
+```python
+sdf_current_columns = sdf.columns
+print(sdf_current_columns)
+```
+
+    ['items_rolling_max', 'items_rolling_sum', 'amount_rolling_max', 'amount_rolling_sum', 'user_id', 'timestamp', 'items', 'amount']
+
+
+
+```python
+#ventana deslizante 2 rows hacia atras
+sdf = sdf.select( *[op.expr_window(window_expanding_unbounded_2) for op in ops_bounded_2] + sdf_current_columns)
+sdf_current_columns = sdf.columns
+```
+
+
+```python
+%%time
+df_transformed = sdf.select("*").toPandas()
+```
+
+    CPU times: user 24.9 ms, sys: 7.67 ms, total: 32.6 ms
+    Wall time: 11.2 s
+
+
+
+```python
+columns_created=[col for col in sdf_current_columns if col not in key_columns+base_columns]
+print(columns_created)
+```
+
+    ['items_rolling_max_2', 'items_rolling_sum_2', 'amount_rolling_max_2', 'amount_rolling_sum_2', 'items_rolling_max', 'items_rolling_sum', 'amount_rolling_max', 'amount_rolling_sum']
+
+
+
+```python
+print(df_transformed[key_columns+base_columns+columns_created].sort_values(["user_id", "timestamp"]))
+```
+
+       user_id           timestamp  items  amount  items_rolling_max_2  \
+    7        a 2016-01-02 00:01:02      1    4.15                    1   
+    8        a 2016-01-02 00:01:03      3   50.00                    3   
+    9        a 2016-02-02 00:01:02      5   29.50                    5   
+    10       a 2016-02-04 00:01:03      7   16.38                    7   
+    11       a 2016-05-02 00:01:02      3    2.15                    7   
+    12       a 2016-06-04 00:01:03      1  246.32                    3   
+    0        b 2016-01-02 23:59:50      2  190.00                    2   
+    1        b 2016-01-02 23:59:59      1   43.00                    2   
+    2        b 2016-01-02 23:59:59      3   12.00                    3   
+    3        b 2016-02-05 23:59:50     10   24.43                   10   
+    4        b 2016-03-09 23:59:59      2    3.99                   10   
+    5        b 2016-07-05 23:59:50      9  187.12                    9   
+    6        b 2016-08-09 23:59:59      4  210.00                    9   
+    
+        items_rolling_sum_2  amount_rolling_max_2  amount_rolling_sum_2  \
+    7                     1                  4.15                  4.15   
+    8                     4                 50.00                 54.15   
+    9                     8                 50.00                 79.50   
+    10                   12                 29.50                 45.88   
+    11                   10                 16.38                 18.53   
+    12                    4                246.32                248.47   
+    0                     2                190.00                190.00   
+    1                     3                190.00                233.00   
+    2                     4                 43.00                 55.00   
+    3                    13                 24.43                 36.43   
+    4                    12                 24.43                 28.42   
+    5                    11                187.12                191.11   
+    6                    13                210.00                397.12   
+    
+        items_rolling_max  items_rolling_sum  amount_rolling_max  \
+    7                   1                  1                4.15   
+    8                   3                  4               50.00   
+    9                   5                  9               50.00   
+    10                  7                 16               50.00   
+    11                  7                 19               50.00   
+    12                  7                 20              246.32   
+    0                   2                  2              190.00   
+    1                   3                  6              190.00   
+    2                   3                  6              190.00   
+    3                  10                 16              190.00   
+    4                  10                 18              190.00   
+    5                  10                 27              190.00   
+    6                  10                 31              210.00   
+    
+        amount_rolling_sum  
+    7                 4.15  
+    8                54.15  
+    9                83.65  
+    10              100.03  
+    11              102.18  
+    12              348.50  
+    0               190.00  
+    1               245.00  
+    2               245.00  
+    3               269.43  
+    4               273.42  
+    5               460.54  
+    6               670.54  
+
+
+
+```python
+
+```

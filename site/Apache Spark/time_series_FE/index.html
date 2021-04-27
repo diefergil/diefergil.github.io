@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Time series features creation - My Docs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Time series features creation";
+    var mkdocs_page_input_path = "Apache Spark/time_series_FE.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> My Docs</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Apache Spark</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Time series features creation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#rolling-windows-with-pandas">Rolling windows with Pandas</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#lags-feature-with-pandas">Lags Feature with pandas</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">My Docs</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Apache Spark &raquo;</li>
+        
+      
+    
+    <li>Time series features creation</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="time-series-feature-engineering">Time series feature engineering</h1>
+<p>How to take advantage of python to create temporary variable transformations using Python</p>
+<h2 id="rolling-windows-with-pandas">Rolling windows with Pandas</h2>
+<pre><code class="language-python">import pandas as pd
+</code></pre>
+<pre><code class="language-python"># Create a simple DataFrame.
+data = [
+('a', 1, 4.15, '2016-01-02 00:01:02'),
+('a', 3, 50., '2016-01-02 00:01:03'),
+('b', 2, 190., '2016-01-02 23:59:50'),
+('b', 1, 43., '2016-01-02 23:59:59'),
+('b', 3, 12., '2016-01-02 23:59:59'),
+('a', 5, 29.5, '2016-02-02 00:01:02'),
+('a', 7, 16.38, '2016-02-04 00:01:03'),
+('b', 10, 24.43, '2016-02-05 23:59:50'),
+('b', 2, 3.99, '2016-03-09 23:59:59'),
+('a', 3, 2.15, '2016-05-02 00:01:02'),
+('a', 1, 246.32, '2016-06-04 00:01:03'),
+('b', 9, 187.12, '2016-07-05 23:59:50'),
+('b', 4, 210., '2016-08-09 23:59:59')
+]
+
+data=pd.DataFrame(data, columns=[&quot;user_id&quot;, &quot;items&quot;, &quot;amount&quot;, &quot;timestamp&quot;] ).set_index(&quot;user_id&quot;).sort_values([&quot;user_id&quot;,&quot;timestamp&quot;], ascending=[True, True])
+data[&quot;timestamp&quot;]=pd.to_datetime(data[&quot;timestamp&quot;])
+</code></pre>
+<pre><code class="language-python">print(data)
+</code></pre>
+<pre><code>         items  amount           timestamp
+user_id                                   
+a            1    4.15 2016-01-02 00:01:02
+a            3   50.00 2016-01-02 00:01:03
+a            5   29.50 2016-02-02 00:01:02
+a            7   16.38 2016-02-04 00:01:03
+a            3    2.15 2016-05-02 00:01:02
+a            1  246.32 2016-06-04 00:01:03
+b            2  190.00 2016-01-02 23:59:50
+b            1   43.00 2016-01-02 23:59:59
+b            3   12.00 2016-01-02 23:59:59
+b           10   24.43 2016-02-05 23:59:50
+b            2    3.99 2016-03-09 23:59:59
+b            9  187.12 2016-07-05 23:59:50
+b            4  210.00 2016-08-09 23:59:59
+</code></pre>
+<pre><code class="language-python">key_columns =  ['user_id', 'timestamp']
+base_columns = [&quot;items&quot;, &quot;amount&quot;]
+</code></pre>
+<p>Here’s an awesome gif that explains this idea in a wonderfully intuitive way:</p>
+<p><img alt="Alt Text" src="https://cdn.analyticsvidhya.com/wp-content/uploads/2019/11/3hotmk.gif" /></p>
+<p>Since this looks like a window that is sliding with every next point, the features generated using this method are called the ‘rolling window’ features.</p>
+<pre><code class="language-python">rolling_times = (2, 3, 4)
+print(data.assign(**{
+    '{}_rolling_sum_{}'.format(col, t): data[col].groupby(level=&quot;user_id&quot;).rolling(window = t).sum().values
+    for t in rolling_times
+    for col in base_columns}).sort_values([&quot;user_id&quot;, &quot;timestamp&quot;]))
+</code></pre>
+<pre><code>         items  amount           timestamp  items_rolling_sum_2  \
+user_id                                                           
+a            1    4.15 2016-01-02 00:01:02                  NaN   
+a            3   50.00 2016-01-02 00:01:03                  4.0   
+a            5   29.50 2016-02-02 00:01:02                  8.0   
+a            7   16.38 2016-02-04 00:01:03                 12.0   
+a            3    2.15 2016-05-02 00:01:02                 10.0   
+a            1  246.32 2016-06-04 00:01:03                  4.0   
+b            2  190.00 2016-01-02 23:59:50                  NaN   
+b            1   43.00 2016-01-02 23:59:59                  3.0   
+b            3   12.00 2016-01-02 23:59:59                  4.0   
+b           10   24.43 2016-02-05 23:59:50                 13.0   
+b            2    3.99 2016-03-09 23:59:59                 12.0   
+b            9  187.12 2016-07-05 23:59:50                 11.0   
+b            4  210.00 2016-08-09 23:59:59                 13.0
+
+         amount_rolling_sum_2  items_rolling_sum_3  amount_rolling_sum_3  \
+user_id                                                                    
+a                         NaN                  NaN                   NaN   
+a                       54.15                  NaN                   NaN   
+a                       79.50                  9.0                 83.65   
+a                       45.88                 15.0                 95.88   
+a                       18.53                 15.0                 48.03   
+a                      248.47                 11.0                264.85   
+b                         NaN                  NaN                   NaN   
+b                      233.00                  NaN                   NaN   
+b                       55.00                  6.0                245.00   
+b                       36.43                 14.0                 79.43   
+b                       28.42                 15.0                 40.42   
+b                      191.11                 21.0                215.54   
+b                      397.12                 15.0                401.11
+
+         items_rolling_sum_4  amount_rolling_sum_4  
+user_id                                             
+a                        NaN                   NaN  
+a                        NaN                   NaN  
+a                        NaN                   NaN  
+a                       16.0                100.03  
+a                       18.0                 98.03  
+a                       16.0                294.35  
+b                        NaN                   NaN  
+b                        NaN                   NaN  
+b                        NaN                   NaN  
+b                       16.0                269.43  
+b                       16.0                 83.42  
+b                       24.0                227.54  
+b                       25.0                425.54
+</code></pre>
+<h2 id="lags-feature-with-pandas">Lags Feature with pandas</h2>
+<p>Consider this – you are predicting the stock price for a company. So, the previous day’s stock price is important to make a prediction, right? In other words, the value at time t is greatly affected by the value at time t-1. The past values are known as lags, so t-1 is lag 1, t-2 is lag 2, and so on.</p>
+<pre><code class="language-python">lags = (1, 2)
+
+print(data.assign(**{
+    '{}_lag_{}'.format(col, t): data[col].groupby(level=&quot;user_id&quot;).shift(t)
+    for t in lags
+    for col in base_columns}))
+</code></pre>
+<pre><code>         items  amount           timestamp  items_lag_1  amount_lag_1  \
+user_id                                                                 
+a            1    4.15 2016-01-02 00:01:02          NaN           NaN   
+a            3   50.00 2016-01-02 00:01:03          1.0          4.15   
+a            5   29.50 2016-02-02 00:01:02          3.0         50.00   
+a            7   16.38 2016-02-04 00:01:03          5.0         29.50   
+a            3    2.15 2016-05-02 00:01:02          7.0         16.38   
+a            1  246.32 2016-06-04 00:01:03          3.0          2.15   
+b            2  190.00 2016-01-02 23:59:50          NaN           NaN   
+b            1   43.00 2016-01-02 23:59:59          2.0        190.00   
+b            3   12.00 2016-01-02 23:59:59          1.0         43.00   
+b           10   24.43 2016-02-05 23:59:50          3.0         12.00   
+b            2    3.99 2016-03-09 23:59:59         10.0         24.43   
+b            9  187.12 2016-07-05 23:59:50          2.0          3.99   
+b            4  210.00 2016-08-09 23:59:59          9.0        187.12
+
+         items_lag_2  amount_lag_2  
+user_id                             
+a                NaN           NaN  
+a                NaN           NaN  
+a                1.0          4.15  
+a                3.0         50.00  
+a                5.0         29.50  
+a                7.0         16.38  
+b                NaN           NaN  
+b                NaN           NaN  
+b                2.0        190.00  
+b                1.0         43.00  
+b                3.0         12.00  
+b               10.0         24.43  
+b                2.0          3.99
+</code></pre>
+<h1 id="rolling-features-with-apache-spark-and-pyspark">Rolling Features with Apache Spark and Pyspark</h1>
+<p>Init Pyspark</p>
+<pre><code class="language-python">from pyspark import SparkContext, SQLContext, SparkConf
+from pyspark.sql import functions as F
+from pyspark.sql import SparkSession, Window
+
+conf = SparkConf().setAll([
+                       ('spark.master', &quot;local&quot;),
+                       (&quot;spark.sql.execution.arrow.enabled&quot;, &quot;true&quot;)])
+
+sc = SparkSession.builder.config(conf=conf).getOrCreate()
+sc
+</code></pre>
+<pre><code>&lt;div&gt;
+    &lt;p&gt;&lt;b&gt;SparkSession - hive&lt;/b&gt;&lt;/p&gt;
+</code></pre>
+<div>
+    <p><b>SparkContext</b></p>
+
+    <p><a href="http://hub-dataproc-test-1-diego-fernandez-m.c.bnext-machine.internal:41743">Spark UI</a></p>
+
+    <dl>
+      <dt>Version</dt>
+        <dd><code>v2.4.7</code></dd>
+      <dt>Master</dt>
+        <dd><code>yarn</code></dd>
+      <dt>AppName</dt>
+        <dd><code>PySparkShell</code></dd>
+    </dl>
+</div>
+
+<pre><code>&lt;/div&gt;
+</code></pre>
+<pre><code class="language-python">sdf = sc.createDataFrame(data.reset_index())
+</code></pre>
+<pre><code class="language-python">print(sdf)
+</code></pre>
+<pre><code>DataFrame[user_id: string, items: bigint, amount: double, timestamp: timestamp]
+</code></pre>
+<p>We use a dictionary to specify the aggregations we want using already available functions.</p>
+<pre><code class="language-python">aggregations = {&quot;max&quot;: F.max, &quot;sum&quot;: F.sum}
+</code></pre>
+<p>In the next cell I declare how to calculate a sliding window. First I indicate that I want an aggregation for each user with a date-based sort. Then from my aggregation I indicate that I only want the current value and the immediately previous one.</p>
+<pre><code class="language-python">window_expanding = Window.partitionBy(&quot;user_id&quot;).orderBy(sdf[&quot;timestamp&quot;].asc())
+window_expanding_unbounded_2 = window_expanding.rowsBetween(-1, 0)
+</code></pre>
+<p>Here I create a class that allows me to scale the creation of variables through a simple loop that joins variable names with the transformations that I specify in the dictionary.</p>
+<pre><code class="language-python">from collections import namedtuple
+
+class AggregationOp(namedtuple(&quot;Op&quot;, [&quot;c&quot;, &quot;func&quot;, &quot;alias&quot;])):
+
+    def expr(self):
+        if callable(self.func):
+            return self.func(self.c).alias(self.alias)
+        else:
+            return F.expr(&quot;{func}(`{c}`)&quot;.format
+                (func = self.func, c = self.c)).alias(self.alias)
+
+    def expr_window(self, window):
+        if callable(self.func):
+            return self.func(self.c).over(window).alias(self.alias)
+        else:
+            return F.expr(&quot;{func}(`{c}`)&quot;.format
+                (func = self.func, c = self.c)).over(window).alias(self.alias)
+</code></pre>
+<pre><code class="language-python">ops = [AggregationOp(col, agg, &quot;{}_rolling_{}&quot;.format(col, agg)) for col in base_columns for agg in aggregations.keys()] #unbounded transformation
+ops_bounded_2 = [AggregationOp(col, agg, &quot;{}_rolling_{}_2&quot;.format(col, agg)) for col in base_columns for agg in aggregations.keys()] #bounded transformation (-1, 0)=(1 preceding and current)
+
+</code></pre>
+<pre><code class="language-python">print(ops)
+</code></pre>
+<pre><code>[AggregationOp(c='items', func='max', alias='items_rolling_max'), AggregationOp(c='items', func='sum', alias='items_rolling_sum'), AggregationOp(c='amount', func='max', alias='amount_rolling_max'), AggregationOp(c='amount', func='sum', alias='amount_rolling_sum')]
+</code></pre>
+<pre><code class="language-python">sdf = sdf.select( *[op.expr_window(window_expanding) for op in ops] + 
+                 ['user_id', &quot;timestamp&quot;] + base_columns )
+</code></pre>
+<pre><code class="language-python">sdf_current_columns = sdf.columns
+print(sdf_current_columns)
+</code></pre>
+<pre><code>['items_rolling_max', 'items_rolling_sum', 'amount_rolling_max', 'amount_rolling_sum', 'user_id', 'timestamp', 'items', 'amount']
+</code></pre>
+<pre><code class="language-python">#ventana deslizante 2 rows hacia atras
+sdf = sdf.select( *[op.expr_window(window_expanding_unbounded_2) for op in ops_bounded_2] + sdf_current_columns)
+sdf_current_columns = sdf.columns
+</code></pre>
+<pre><code class="language-python">%%time
+df_transformed = sdf.select(&quot;*&quot;).toPandas()
+</code></pre>
+<pre><code>CPU times: user 24.9 ms, sys: 7.67 ms, total: 32.6 ms
+Wall time: 11.2 s
+</code></pre>
+<pre><code class="language-python">columns_created=[col for col in sdf_current_columns if col not in key_columns+base_columns]
+print(columns_created)
+</code></pre>
+<pre><code>['items_rolling_max_2', 'items_rolling_sum_2', 'amount_rolling_max_2', 'amount_rolling_sum_2', 'items_rolling_max', 'items_rolling_sum', 'amount_rolling_max', 'amount_rolling_sum']
+</code></pre>
+<pre><code class="language-python">print(df_transformed[key_columns+base_columns+columns_created].sort_values([&quot;user_id&quot;, &quot;timestamp&quot;]))
+</code></pre>
+<pre><code>   user_id           timestamp  items  amount  items_rolling_max_2  \
+7        a 2016-01-02 00:01:02      1    4.15                    1   
+8        a 2016-01-02 00:01:03      3   50.00                    3   
+9        a 2016-02-02 00:01:02      5   29.50                    5   
+10       a 2016-02-04 00:01:03      7   16.38                    7   
+11       a 2016-05-02 00:01:02      3    2.15                    7   
+12       a 2016-06-04 00:01:03      1  246.32                    3   
+0        b 2016-01-02 23:59:50      2  190.00                    2   
+1        b 2016-01-02 23:59:59      1   43.00                    2   
+2        b 2016-01-02 23:59:59      3   12.00                    3   
+3        b 2016-02-05 23:59:50     10   24.43                   10   
+4        b 2016-03-09 23:59:59      2    3.99                   10   
+5        b 2016-07-05 23:59:50      9  187.12                    9   
+6        b 2016-08-09 23:59:59      4  210.00                    9
+
+    items_rolling_sum_2  amount_rolling_max_2  amount_rolling_sum_2  \
+7                     1                  4.15                  4.15   
+8                     4                 50.00                 54.15   
+9                     8                 50.00                 79.50   
+10                   12                 29.50                 45.88   
+11                   10                 16.38                 18.53   
+12                    4                246.32                248.47   
+0                     2                190.00                190.00   
+1                     3                190.00                233.00   
+2                     4                 43.00                 55.00   
+3                    13                 24.43                 36.43   
+4                    12                 24.43                 28.42   
+5                    11                187.12                191.11   
+6                    13                210.00                397.12
+
+    items_rolling_max  items_rolling_sum  amount_rolling_max  \
+7                   1                  1                4.15   
+8                   3                  4               50.00   
+9                   5                  9               50.00   
+10                  7                 16               50.00   
+11                  7                 19               50.00   
+12                  7                 20              246.32   
+0                   2                  2              190.00   
+1                   3                  6              190.00   
+2                   3                  6              190.00   
+3                  10                 16              190.00   
+4                  10                 18              190.00   
+5                  10                 27              190.00   
+6                  10                 31              210.00
+
+    amount_rolling_sum  
+7                 4.15  
+8                54.15  
+9                83.65  
+10              100.03  
+11              102.18  
+12              348.50  
+0               190.00  
+1               245.00  
+2               245.00  
+3               269.43  
+4               273.42  
+5               460.54  
+6               670.54
+</code></pre>
+<pre><code class="language-python">
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../.." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../.." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
