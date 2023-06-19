@@ -24,7 +24,7 @@
 * [Census classification](https://github.com/diefergil/census_classification)
 * [Churn prediction](https://github.com/diefergil/customer_churn)
 
-##
+## Stack
 
 <div style="display: inline_block"><br>
   <img align="center" alt="Python" height="30" width="40" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg">
@@ -33,7 +33,7 @@
   <img align="center" alt="Python" height="30" width="40" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg">
 </div>
 
-## 
+## Contact
 
 <div> 
   <a href="https://www.linkedin.com/in/diegofernandezgil/" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" target="_blank"></a>
