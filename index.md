@@ -42,4 +42,4 @@
 
 # Projects
 
-## [Code snippets & HOWTOs](https://diefergil.github.io/personal-notes/)
+* [Code snippets & HOWTOs](https://diefergil.github.io/personal-notes/)
