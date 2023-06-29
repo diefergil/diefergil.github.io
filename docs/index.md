@@ -1,4 +1,4 @@
-### Hi there, I'm Diego 👋
+### Hi there, I'm Diego Fernández 👋
 
 <!--
 **diefergil/diefergil** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
