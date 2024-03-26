@@ -18,11 +18,13 @@
 
 # Public portfolio
 
-* [Dynamic risk price assesment](https://github.com/diefergil/dynamic-risk-assessment-system)
-* [Music genre classification](https://github.com/diefergil/genre_classification)
-* [AirBnB rental price prediction](https://github.com/diefergil/airbnb-rental-price-prediction)
-* [Census classification](https://github.com/diefergil/census_classification)
-* [Churn prediction](https://github.com/diefergil/customer_churn)
+* [Multimodal real state search](https://github.com/diefergil/homematch) - Multimodal search based on text and image retrieval.
+* [Dynamic risk price assesment](https://github.com/diefergil/dynamic-risk-assessment-system) - Demonstrates training and deploying a sklearn model within a Flask endpoint.
+* [Music genre classification](https://github.com/diefergil/genre_classification) - Implements a reusable workflow with MLflow, W&B logging, and Hydra for running multiple configurations.
+* [AirBnB rental price prediction](https://github.com/diefergil/airbnb-rental-price-prediction) - Features a reusable workflow for predictive modeling using MLflow, W&B, and Hydra.
+* [Census classification](https://github.com/diefergil/census_classification) - An MLOps project utilizing DVC, S3, GitHub Actions, FastAPI, and deployment on Heroku.
+* [Churn prediction](https://github.com/diefergil/customer_churn) - Provides a basic structure for a customer churn prediction project.
+  
 
 ## Stack
 
